@@ -6,6 +6,8 @@ import java.util.List;
 
 public class TriageStragegyFifo implements TriageStrategy {
     public void triagePatient(String name, int gravity, VisibleSymptom visibleSymptom, List<String> queue) {
-        queue.add(name);
+        if (visibleSymptom != VisibleSymptom.CORONAVIRUS){
+            queue.add(name);
+        }
     }
 }

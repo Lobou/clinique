@@ -78,4 +78,13 @@ class ClinicTest {
 
         assertEquals(ANOTHER_NAME, clinic.getNextRadiologyPatient() );
     }
+
+    @Test
+    void GivenAnEmptyClinic_WhenTriageCoronavirusPatient_ThenQueueIsEmpty(){
+        Clinic clinic = new Clinic(A_TRIAGE_TYPE, A_TRIAGE_TYPE);
+
+        clinic.triagePatient(A_NAME, A_GRAVITY, VisibleSymptom.CORONAVIRUS);
+
+        assertThrows(EmptyQueueException.class, clinic::getNextDoctorPatient);
+    }
 }
