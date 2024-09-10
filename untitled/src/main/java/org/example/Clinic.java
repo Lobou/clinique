@@ -1,5 +1,8 @@
 package org.example;
 
+import org.example.triage.TriageStrategy;
+import org.example.triage.TriageStrategyFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,14 +12,19 @@ public class Clinic {
 
     private List<String> doctorQueue = new ArrayList<>();
     private List<String> radiologyQueue = new ArrayList<>();
-    public Clinic() {
+    private TriageStrategy doctorTriageStrategy;
+    private TriageStrategy radiologyTriageStrategy;
+    public Clinic(TriageType doctorTriageType, TriageType radiologyTriageType) {
+        TriageStrategyFactory triageFactory = new TriageStrategyFactory();
+        doctorTriageStrategy = triageFactory.create(doctorTriageType);
+        radiologyTriageStrategy = triageFactory.create(radiologyTriageType);
     }
 
     public void triagePatient(String name, int gravity, VisibleSymptom visibleSymptom) {
-        doctorQueue.add(name);
+        doctorTriageStrategy.triagePatient(name, gravity, visibleSymptom, doctorQueue);
         if (isRadiologyPatient(visibleSymptom))
         {
-            radiologyQueue.add(name);
+            radiologyTriageStrategy.triagePatient(name, gravity, visibleSymptom, radiologyQueue);
         }
     }
 
@@ -36,8 +44,7 @@ public class Clinic {
         return radiologyQueue.remove(0);
     }
 
-    private boolean isRadiologyPatient(VisibleSymptom visibleSymptom)
-    {
+    private boolean isRadiologyPatient(VisibleSymptom visibleSymptom) {
         return visibleSymptom == VisibleSymptom.BROKEN_BONE || visibleSymptom == SPRAIN;
     }
 }
