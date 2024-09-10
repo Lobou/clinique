@@ -1,17 +1,30 @@
 package org.example.triage;
 
+import org.example.EmptyQueueException;
+import org.example.Patient;
 import org.example.VisibleSymptom;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TriageStrategyGravity implements TriageStrategy {
-    public void triagePatient(String name, int gravity, VisibleSymptom visibleSymptom, List<String> queue) {
-        if (visibleSymptom != VisibleSymptom.CORONAVIRUS){
-            if (isGrave(gravity)) {
-                queue.add(0, name);
+
+    private List<Patient> queue = new ArrayList<>();
+
+    public void triagePatient(Patient patient) {
+        if (patient.symptom != VisibleSymptom.CORONAVIRUS){
+            if (isGrave(patient.gravity)) {
+                queue.add(0, patient);
             }
-            queue.add(name);
+            queue.add(patient);
         }
+    }
+
+    public Patient getNext(){
+        if (queue.isEmpty()){
+            throw new EmptyQueueException();
+        }
+        return  queue.remove(0);
     }
 
     private boolean isGrave(int gravity){

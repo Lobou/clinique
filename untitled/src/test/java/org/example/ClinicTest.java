@@ -5,17 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ClinicTest {
-
-    String A_NAME = "Monsieur Soleil";
-    String ANOTHER_NAME = "Docteur Queue";
-    int A_GRAVITY = 3;
-    int A_GRAVE_GRAVITY = 7;
-    VisibleSymptom A_NON_RADIOLOGY_SYMPTOM = VisibleSymptom.COLD;
-    VisibleSymptom A_RADIOLOGY_SYMPTOM = VisibleSymptom.SPRAIN;
     TriageType A_TRIAGE_TYPE = TriageType.FIFO;
 
     @Test
-    void WhenCreatingClinic_ThenDoctorQueueShouldBeEmpty()
+    void GivenANewClinic_WhenGettingNextDoctorPatient_ThenEmptyQueueExceptionRaised()
     {
         Clinic clinic = new Clinic(A_TRIAGE_TYPE, A_TRIAGE_TYPE);
 
@@ -23,7 +16,7 @@ class ClinicTest {
     }
 
     @Test
-    void WhenCreatingClinic_ThenRadiologyQueueShouldBeEmpty()
+    void GivenANewClinic_WhenGettingNextRadiologyPatient_ThenEmptyQueueExceptionRaised()
     {
         Clinic clinic = new Clinic(A_TRIAGE_TYPE, A_TRIAGE_TYPE);
 
@@ -33,19 +26,20 @@ class ClinicTest {
     @Test
     void GivenAFifoClinicWithMultiplePatients_WhenGetNextDoctorPatient_ThenGetFirstPatientTriaged(){
         Clinic clinic = new Clinic(TriageType.FIFO, TriageType.FIFO);
-        clinic.triagePatient(A_NAME, A_GRAVITY, A_NON_RADIOLOGY_SYMPTOM);
-        clinic.triagePatient(ANOTHER_NAME, A_GRAVITY, A_NON_RADIOLOGY_SYMPTOM);
+        Patient firstPatient = new PatientFixture().create();
+        clinic.triagePatient(firstPatient);
+        clinic.triagePatient(new PatientFixture().create());
 
-        String nextPatient = clinic.getNextDoctorPatient();
+        Patient nextPatient = clinic.getNextDoctorPatient();
 
-        assertEquals(A_NAME, nextPatient);
+        assertEquals(firstPatient, nextPatient);
     }
 
     @Test
     void GivenAFifoClinic_WhenTriageNonRadiologyPatient_ThenRadiologyQueueShouldBeEmpty(){
         Clinic clinic = new Clinic(TriageType.FIFO, TriageType.FIFO);
 
-        clinic.triagePatient(A_NAME, A_GRAVITY, A_NON_RADIOLOGY_SYMPTOM);
+        clinic.triagePatient(new PatientFixture().create());
 
         assertThrows(EmptyQueueException.class, clinic::getNextRadiologyPatient);
     }
@@ -53,37 +47,41 @@ class ClinicTest {
     @Test
     void GivenAFifoClinic_WhenTriageRadiologyPatient_ThenPatientShouldBeNextInRadiologyQueue(){
         Clinic clinic = new Clinic(TriageType.FIFO, TriageType.FIFO);
+        Patient patient = new PatientFixture().withRadiologySymptom().create();
 
-        clinic.triagePatient(A_NAME, A_GRAVITY, A_RADIOLOGY_SYMPTOM);
+        clinic.triagePatient(patient);
 
-        assertEquals(A_NAME, clinic.getNextRadiologyPatient() );
+        assertEquals(patient, clinic.getNextRadiologyPatient() );
     }
 
     @Test
-    void GivenAGravityClinicWithAPatientInDoctorQueue_WhenTriageGravePatient_ThenGravePatientIsFirstInQueue(){
+    void GivenAGravityClinicWithAPatientInDoctorQueue_WhenTriageSeverePatient_ThenSeverePatientIsFirstInQueue(){
         Clinic clinic = new Clinic(TriageType.GRAVITY, TriageType.GRAVITY);
-        clinic.triagePatient(A_NAME, A_GRAVITY, A_NON_RADIOLOGY_SYMPTOM);
+        clinic.triagePatient(new PatientFixture().create());
+        Patient severePatient = new PatientFixture().withSevereGravity().create();
 
-        clinic.triagePatient(ANOTHER_NAME, A_GRAVE_GRAVITY, A_NON_RADIOLOGY_SYMPTOM);
+        clinic.triagePatient(severePatient);
 
-        assertEquals(ANOTHER_NAME, clinic.getNextDoctorPatient() );
+        assertEquals(severePatient, clinic.getNextDoctorPatient() );
     }
 
     @Test
-    void GivenAGravityClinicWithAPatientInRadiologyQueue_WhenTriageGravePatient_ThenGravePatientIsFirstInRadiologyQueue(){
+    void GivenAGravityClinicWithAPatientInRadiologyQueue_WhenTriageSeverePatient_ThenSeverePatientIsFirstInRadiologyQueue(){
         Clinic clinic = new Clinic(TriageType.GRAVITY, TriageType.GRAVITY);
-        clinic.triagePatient(A_NAME, A_GRAVITY, A_RADIOLOGY_SYMPTOM);
+        clinic.triagePatient(new PatientFixture().withRadiologySymptom().create());
+        Patient severePatient = new PatientFixture().withRadiologySymptom().withSevereGravity().create();
 
-        clinic.triagePatient(ANOTHER_NAME, A_GRAVE_GRAVITY, A_RADIOLOGY_SYMPTOM);
+        clinic.triagePatient(severePatient);
 
-        assertEquals(ANOTHER_NAME, clinic.getNextRadiologyPatient() );
+        assertEquals(severePatient, clinic.getNextRadiologyPatient() );
     }
 
     @Test
     void GivenAnEmptyClinic_WhenTriageCoronavirusPatient_ThenQueueIsEmpty(){
         Clinic clinic = new Clinic(A_TRIAGE_TYPE, A_TRIAGE_TYPE);
+        Patient coronaPatient = new PatientFixture().withCoronavirus().create();
 
-        clinic.triagePatient(A_NAME, A_GRAVITY, VisibleSymptom.CORONAVIRUS);
+        clinic.triagePatient(coronaPatient);
 
         assertThrows(EmptyQueueException.class, clinic::getNextDoctorPatient);
     }

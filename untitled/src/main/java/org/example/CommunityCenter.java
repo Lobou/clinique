@@ -3,11 +3,7 @@ package org.example;
 import org.example.triage.TriageStrategy;
 import org.example.triage.TriageStrategyFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class CommunityCenter {
-    List<String> queue = new ArrayList<>();
     private TriageStrategy triageStrategy;
 
     public CommunityCenter(TriageType triageType) {
@@ -15,7 +11,11 @@ public class CommunityCenter {
         triageStrategy = triageStrategyFactory.create(triageType);
     }
 
-    public void triagePatient(String name, int gravity) {
-        triageStrategy.triagePatient(name, gravity, null, queue);
+    public void triagePatient(Patient patient) {
+        triageStrategy.triagePatient(patient);
+    }
+
+    public Patient getNextPatient(){
+        return triageStrategy.getNext();
     }
 }
